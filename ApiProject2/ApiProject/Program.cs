@@ -83,6 +83,10 @@ try
     builder.Services.AddSingleton<ApiProject.Services.Interface.ICacheService,
                                   ApiProject.Services.Implement.CacheService>();
 
+    // Kafka producer — long-lived, thread-safe, one instance per app
+    builder.Services.AddSingleton<ApiProject.Services.Interface.IKafkaProducerService,
+                                  ApiProject.Services.Implement.KafkaProducerService>();
+
     // Database Context
     builder.Services.AddDbContext<ProjectContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

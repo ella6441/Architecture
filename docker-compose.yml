@@ -18,11 +18,15 @@ services:
       - Jwt__ExpireHours=2
       - Email__EmailAddress=${EMAIL_ADDRESS}
       - Email__AppPassword=${EMAIL_APP_PASSWORD}
+      - KafkaSettings__BootstrapServers=kafka:9092
+      - KafkaSettings__Topic=gift-lottery-events
     depends_on:
       sqlserver:
         condition: service_healthy
       redis:
         condition: service_started
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
 
   # ── Frontend: Angular (served by nginx) ───────────────────────────────────
@@ -64,6 +68,57 @@ services:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    restart: unless-stopped
+
+  # ── Kafka (event broker, KRaft single-node — no Zookeeper) ────────────────
+  kafka:
+    image: apache/kafka:3.8.0
+    ports:
+      - "9094:9094"   # host access (PLAINTEXT_HOST) — e.g. for local debugging tools
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:9094
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9094
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+  # ── Kafka UI (topic/consumer-group/offset monitoring) ─────────────────────
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    ports:
+      - "8090:8080"
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+    depends_on:
+      kafka:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Kafka consumer (separate server: reads events, prints to log) ─────────
+  kafka-consumer:
+    build:
+      context: ./ApiProject2
+      dockerfile: KafkaConsumerService/Dockerfile
+    environment:
+      - KafkaSettings__BootstrapServers=kafka:9092
+      - KafkaSettings__Topic=gift-lottery-events
+      - KafkaSettings__GroupId=gift-lottery-consumer-group
+    depends_on:
+      kafka:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:

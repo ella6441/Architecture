@@ -390,3 +390,13 @@ E:\Api Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\refint\ApiProject.T
 E:\Api Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.pdb
 E:\Api Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.genruntimeconfig.cache
 E:\Api Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ref\ApiProject.Tests.dll
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\bin\Debug\net8.0\CoverletSourceRootsMapping_ApiProject.Tests
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.csproj.AssemblyReference.cache
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.AssemblyInfoInputs.cache
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.AssemblyInfo.cs
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.csproj.CoreCompileInputs.cache
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.sourcelink.json
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.dll
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\refint\ApiProject.Tests.dll
+C:\Users\belli\Desktop\Project\ApiProject2\ApiProject.Tests\obj\Debug\net8.0\ApiProject.Tests.pdb

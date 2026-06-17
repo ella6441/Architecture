@@ -10,12 +10,14 @@ namespace ApiProject.Services
         private readonly ICartRepository _repository;
         private readonly ILogger<CartService> _logger;
         private readonly IGiftsService _giftsService;
+        private readonly IKafkaProducerService _kafkaProducer;
 
-        public CartService(ICartRepository repository, ILogger<CartService> logger, IGiftsService giftsService)
+        public CartService(ICartRepository repository, ILogger<CartService> logger, IGiftsService giftsService, IKafkaProducerService kafkaProducer)
         {
             _repository = repository;
             _logger = logger;
             _giftsService = giftsService;
+            _kafkaProducer = kafkaProducer;
         }
 
         public async Task<CartDto.CartModelDto> CreateCart(int UserId)
@@ -455,6 +457,20 @@ namespace ApiProject.Services
 
                 _logger.LogInformation(
                     "Purchased cart {CartId} for user {UserId}", unpaidCart.Id, userId);
+
+                await _kafkaProducer.PublishAsync("OrderCreated", new
+                {
+                    CartId = unpaidCart.Id,
+                    UserId = unpaidCart.UserModelId,
+                    Items = unpaidCart.CartItem.Select(item => new
+                    {
+                        GiftId = item.GiftModelId,
+                        GiftName = item.Gift.Name,
+                        Quantity = item.Quantity,
+                        TicketPrice = item.Gift.TicketPrice
+                    }),
+                    TotalAmount = unpaidCart.CartItem.Sum(item => item.Quantity * item.Gift.TicketPrice)
+                });
 
                 return await _repository.GetAllPaidCartDtosByUserId(userId);
             }

@@ -13,17 +13,20 @@ namespace ApiProject.Services.Implement
         private readonly ILotteryRepository _lottteryRepository;
         private readonly IGiftRepository _giftRepository;
         private readonly IEmailService _emailService;
+        private readonly IKafkaProducerService _kafkaProducer;
         private readonly ILogger<LotteryService> _logger;
 
         public LotteryService(
             ILotteryRepository lotteryRepository,
             IGiftRepository giftRepository,
             IEmailService emailService,
+            IKafkaProducerService kafkaProducer,
             ILogger<LotteryService> logger)
         {
             _lottteryRepository = lotteryRepository;
             _giftRepository = giftRepository;
             _emailService = emailService;
+            _kafkaProducer = kafkaProducer;
             _logger = logger;
         }
 
@@ -90,6 +93,7 @@ namespace ApiProject.Services.Implement
 
                 };
                 await AppendLotteryResult(toSend);
+                await _kafkaProducer.PublishAsync("LotteryDrawn", toSend);
                 return toSend;
 
             }
