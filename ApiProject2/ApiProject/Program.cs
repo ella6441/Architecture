@@ -184,6 +184,49 @@ try
 
     var app = builder.Build();
 
+    // Apply pending EF Core migrations and seed baseline data automatically on startup —
+    // so a fresh container (new machine, empty DB volume) works with no manual steps.
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ProjectContext>();
+        db.Database.Migrate();
+
+        if (!db.categories.Any())
+        {
+            db.categories.AddRange(
+                new ApiProject.Models.CategoryModel { Name = "אלקטרוניקה" },
+                new ApiProject.Models.CategoryModel { Name = "ספרים" },
+                new ApiProject.Models.CategoryModel { Name = "בית וגן" }
+            );
+            db.SaveChanges();
+        }
+
+        if (!db.donors.Any())
+        {
+            db.donors.Add(new ApiProject.Models.DonorModel
+            {
+                FirstName = "ישראל",
+                LastName = "ישראלי",
+                Email = "donor@example.com",
+                Phone = "0501234567"
+            });
+            db.SaveChanges();
+        }
+
+        if (!db.gifts.Any())
+        {
+            var donorId = db.donors.First().Id;
+            var categoryIds = db.categories.OrderBy(c => c.Id).Select(c => c.Id).ToList();
+
+            db.gifts.AddRange(
+                new ApiProject.Models.GiftModel { Name = "אוזניות אלחוטיות", Description = "אוזניות בלוטות איכותיות", TicketPrice = 149, Image = "5.jpg", DonorModelId = donorId, CategoryModelId = categoryIds[0], isRaffleDone = false },
+                new ApiProject.Models.GiftModel { Name = "ספר בישול", Description = "ספר מתכונים", TicketPrice = 89, Image = "7.jpg", DonorModelId = donorId, CategoryModelId = categoryIds[1], isRaffleDone = false },
+                new ApiProject.Models.GiftModel { Name = "מנורת עיצוב", Description = "מנורה לבית", TicketPrice = 199, Image = "10.jpg", DonorModelId = donorId, CategoryModelId = categoryIds[2], isRaffleDone = false }
+            );
+            db.SaveChanges();
+        }
+    }
+
     // Middleware pipeline
     app.UseSwagger();
     app.UseSwaggerUI();
